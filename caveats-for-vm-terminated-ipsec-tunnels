@@ -51,3 +51,10 @@ Recommended tests:
 a. just drop a PAN-OS VM in a VPC on your end and attach the VPC to the Transit Gateway
 or
 b. Go with physical firewalls/Prisma Access / some other solution that doesn't have the NAT issue
+
+
+
+Possible alternative paths:
+1. use the tests above to figure out how to accomodate this deployment by enabling NAT-T on the Azure side (in this example)
+2. move to a private certificate based interaction between transit gateway and the azure peer FW (this removes the IP Address requirement to my understanding)
+3. set up the S2S tunnel to be directly terminated to the Azure VNet (in this example) from the AWS transit gateway or AWS VPC, instead of terminating to a VPN VM
