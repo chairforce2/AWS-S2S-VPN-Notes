@@ -1,6 +1,9 @@
-I recently tried to build a S2S IPSec tunnel from another provider to a VM-series firewall I had deployed in an Azurwe VNET. I unforuntately was finding issues and getting errors telling me that I had peer ID and/or IP issues. 
+I recently tried to build a S2S IPSec tunnel from another provider to a VM-series firewall I had deployed in an Azurwe VNET. 
+I unforuntately was finding issues and getting errors telling me that I had peer ID and/or IP issues. 
 
-Turns out this behavior arises from the fact that Azure, AWS, etc do NAT when attaching a public IP to the interface of yourr VM. So you have to take this into account as the other peer will see the traffic coming from the public IP, provided by the Cloud provider, however as far as the cloud-hosted PAN-OS peer is concerend, it is sending from a private IP address.
+Turns out this behavior arises from the fact that Azure, AWS, etc do NAT when attaching a public IP to the interface of your VM. 
+So you have to take this into account as the other peer will see the traffic coming from the public IP, provided by the Cloud provider, 
+however as far as the cloud-hosted PAN-OS peer is concerend, it is sending from a private IP address.
 
 So in my example, I had this VM deployed on Azure, with the following IPs:
 
@@ -17,8 +20,10 @@ Peer Identification type: IP Address
 Peer Id value: 10.0.1.4
 
 Once I made this change, the tunnel came up.
+***********************************************************************************************
 
-Now, you will also find that you run into additional challenges when you're trying to connect to a cloud deployed PAN-OS device from a cloud construct, such as from an AWS Transit Gateway. 
+Now, you will also find that you run into additional challenges when you're trying to connect to a cloud deployed PAN-OS device from a cloud construct, 
+such as from an AWS Transit Gateway. 
 As far as I could tell, the AWS Customer Gateway object doesn't have a peer address vs peer id distinction as there is in PAN-OS setups. 
 
 There is some unclear documentation on the AWS Side:
