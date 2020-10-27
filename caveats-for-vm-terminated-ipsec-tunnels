@@ -1,0 +1,26 @@
+I recently tried to build a S2S IPSec tunnel from another provider to a VM-series firewall I had deployed in an Azurwe VNET. I unforuntately was finding issues and getting errors telling me that I had peer ID and/or IP issues. 
+
+Turns out this behavior arises from the fact that Azure, AWS, etc do NAT when attaching a public IP to the interface of yourr VM. So you have to take this into account as the other peer will see the traffic coming from the public IP, provided by the Cloud provider, however as far as the cloud-hosted PAN-OS peer is concerend, it is sending from a private IP address.
+
+So in my example, I had this VM deployed on Azure, with the following IPs:
+
+Private IP of the actual interface: 10.0.1.4
+NAT'd IP received when egressing Azure: 1.2.3.4 (obvious placeholder)
+
+You can read about some of the challenges of this situation here: https://blog.vyos.io/why-ipsec-behind-11-nat-is-so-problematic-and-what-you-can-do-about-it
+
+In order to resolve this, when connecting from another PAN-OS Device, you would configure your IKE gateway profile with the following settings in my example:
+
+Peer address type: IP
+Peer address: 1.2.3.4
+Peer Identification type: IP Address
+Peer Id value: 10.0.1.4
+
+Once I made this change, the tunnel came up.
+
+Now, you will also find that you run into additional challenges when you're trying to connect to a cloud deployed PAN-OS device from a cloud construct, such as from an AWS Transit Gateway. As far as I could tell, the AWS Customer Gateway object doesn't have a peer address vs peer id distinction as there is in PAN-OS setups. Thankfully it seems like someone else has also looked at this challenge:
+
+https://aws.amazon.com/blogs/networking-and-content-delivery/simulating-site-to-site-vpn-customer-gateways-strongswan/
+
+As you will see it seems like support on the AWS CGW for static routing and/or static peers behind a NAT gateway may be a challenge, so we have to look at doing BGP and/or certificate based IPSec:
+https://aws.amazon.com/premiumsupport/knowledge-center/vpn-certificate-based-site-to-site/
