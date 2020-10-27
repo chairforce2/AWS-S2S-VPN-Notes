@@ -18,9 +18,31 @@ Peer Id value: 10.0.1.4
 
 Once I made this change, the tunnel came up.
 
-Now, you will also find that you run into additional challenges when you're trying to connect to a cloud deployed PAN-OS device from a cloud construct, such as from an AWS Transit Gateway. As far as I could tell, the AWS Customer Gateway object doesn't have a peer address vs peer id distinction as there is in PAN-OS setups. Thankfully it seems like someone else has also looked at this challenge:
+Now, you will also find that you run into additional challenges when you're trying to connect to a cloud deployed PAN-OS device from a cloud construct, such as from an AWS Transit Gateway. 
+As far as I could tell, the AWS Customer Gateway object doesn't have a peer address vs peer id distinction as there is in PAN-OS setups. 
+
+There is some unclear documentation on the AWS Side:
+
+From AWS Site to Site VPN documentation:
+"If your customer gateway device is behind a firewall or other device using Network Address Translation
+(NAT), it must have an identity (IDr) configured. For more information about IDr, see RFC 7296."
+
+And during the creation of a customer gateway, if you check out the information bubble for the peer IP you see
+
+"Specify the Internet-routable IP address for your gateway's external interface; the address must be static and may be behind a device performing network address translation (NAT)"
+
+-to me it isn't clear if you can use a private IP behind a NAT device or not.
+-below there are a couple of examples that seem to suggest one may have to to look at doing certificate based IPSec to get away from the IP address limitation:
+
 
 https://aws.amazon.com/blogs/networking-and-content-delivery/simulating-site-to-site-vpn-customer-gateways-strongswan/
-
-As you will see it seems like support on the AWS CGW for static routing and/or static peers behind a NAT gateway may be a challenge, so we have to look at doing BGP and/or certificate based IPSec:
 https://aws.amazon.com/premiumsupport/knowledge-center/vpn-certificate-based-site-to-site/
+
+Recommended tests:
+
+1. attempt to set up customer gateway to the private IP of the PAN-OS VM
+2. if that fails, attempt to do certificate based VPN
+3. If that fails or isn't possible for your org, you can either 
+a. just drop a PAN-OS VM in a VPC on your end and attach the VPC to the Transit Gateway
+or
+b. Go with physical firewalls/Prisma Access / some other solution that doesn't have the NAT issue
